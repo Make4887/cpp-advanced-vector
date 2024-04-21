@@ -204,22 +204,7 @@ public:
     }
 
     void PushBack(T&& value) {
-        if (size_ == Capacity()) {
-            RawMemory<T> new_data(size_ == 0 ? 1 : size_ * 2);
-            new(new_data + size_) T(std::move(value));
-            if constexpr (std::is_nothrow_move_constructible_v<T> || !std::is_copy_constructible_v<T>) {
-                std::uninitialized_move_n(data_.GetAddress(), size_, new_data.GetAddress());
-            }
-            else {
-                std::uninitialized_copy_n(data_.GetAddress(), size_, new_data.GetAddress());
-            }
-            std::destroy_n(data_.GetAddress(), size_);
-            data_.Swap(new_data);
-        }
-        else {
-            new (data_ + size_) T(std::move(value));
-        }
-        ++size_;
+        EmplaceBack(std::move(value));
     }
 
     template <typename... Args>
